@@ -23,10 +23,7 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env
-if 'test' in sys.argv:
-    load_dotenv(dotenv_path=BASE_DIR / '.env.test')
-else:
-    load_dotenv(dotenv_path=BASE_DIR / '.env')
+load_dotenv()
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 if not SECRET_KEY:
