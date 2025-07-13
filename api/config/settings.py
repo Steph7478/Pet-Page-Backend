@@ -28,9 +28,10 @@ if 'test' in sys.argv:
 else:
     load_dotenv(dotenv_path=BASE_DIR / '.env')
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 if not SECRET_KEY:
     raise Exception("SECRET_KEY environment variable not set.")
+
 
 DEBUG = True
 # Fetch variables
