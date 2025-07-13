@@ -1,0 +1,35 @@
+# Arquivos de ambiente
+.env
+.env.*
+!env.example  # opcional, caso queira deixar um exemplo versionado
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Bytecode em diretórios ocultos
+**/__pycache__/
+**/*.py[cod]
+
+# Arquivos de migração específicos (opcional)
+**/migrations/__pycache__/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Arquivos de testes e cobertura
+htmlcov/
+.coverage
+coverage.xml
+pytest_cache/
+.cache/
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db
