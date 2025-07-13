@@ -17,66 +17,62 @@ import sys
 from dotenv import load_dotenv
 import psycopg2
 
-IS_PRODUCTION = os.getenv('ENV') == 'production'
-IS_DEVELOPMENT = os.getenv('ENV') == 'development'
-IS_TEST = os.getenv('ENV') == 'test'
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # api/config/ → api → raiz do projeto
-
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if 'test' in sys.argv:
     load_dotenv(dotenv_path=BASE_DIR / '.env.test')
 else:
     load_dotenv(dotenv_path=BASE_DIR / '.env')
 
+IS_PRODUCTION = os.getenv('ENV') == 'production'
+IS_DEVELOPMENT = os.getenv('ENV') == 'development'
+IS_TEST = os.getenv('ENV') == 'test'
+
+USE_SSL = not IS_TEST and not IS_DEVELOPMENT
+db_options = {'sslmode': 'require'} if USE_SSL else {}
+
 SECRET_KEY = os.environ.get('SECRET_KEY')
 if not SECRET_KEY:
     raise Exception("SECRET_KEY environment variable not set.")
 
-
 DEBUG = not IS_PRODUCTION
-# Fetch variables
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
 
-# Connect to the database
+if IS_TEST:
+    USER = os.getenv("test_user")
+    PASSWORD = os.getenv("test_password")
+    HOST = os.getenv("test_host")
+    PORT = os.getenv("test_port")
+    DBNAME = os.getenv("test_dbname")
+else:
+    USER = os.getenv("user")
+    PASSWORD = os.getenv("password")
+    HOST = os.getenv("host")
+    PORT = os.getenv("port")
+    DBNAME = os.getenv("dbname")
+
+
 try:
     connection = psycopg2.connect(
         user=USER,
         password=PASSWORD,
         host=HOST,
         port=PORT,
-        dbname=DBNAME
+        dbname=DBNAME,
+        sslmode='require' if USE_SSL else 'disable'
     )
     print("Connection successful!")
-    
-    # Create a cursor to execute SQL queries
+
     cursor = connection.cursor()
     
-    # Example query
     cursor.execute("SELECT NOW();")
     result = cursor.fetchone()
     print("Current Time:", result)
 
-    # Close the cursor and connection
     cursor.close()
     connection.close()
     print("Connection closed.")
 
 except Exception as e:
     print(f"Failed to connect: {e}")
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-
-# SECURITY WARNING: don't run with debug turned on in production!
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -165,21 +161,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api.config.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("dbname"),
-        'USER': os.environ.get("user"),
-        'PASSWORD': os.environ.get("password"),
-        'HOST': os.environ.get("host"),
-        'PORT': os.environ.get("port"),
-        'OPTIONS': {
-            'sslmode': 'require'
-        },
+        'NAME': DBNAME,
+        'USER': USER,
+        'PASSWORD': PASSWORD,
+        'HOST': HOST,
+        'PORT': PORT,
+        'OPTIONS': db_options,
         'TEST': {
             'NAME': os.environ.get("test_dbname"),
             'USER': os.environ.get("test_user"),
@@ -187,16 +177,11 @@ DATABASES = {
             'HOST': os.environ.get("test_host"),
             'PORT': os.environ.get("test_port"),
             'OPTIONS': {
-                'sslmode': 'require'
+                'sslmode': 'disable'
             },
         },
     }
 }
-
-# py manage.py test pets.tests.addPet
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -213,10 +198,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -225,14 +206,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
