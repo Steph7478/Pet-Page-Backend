@@ -28,6 +28,11 @@ if 'test' in sys.argv:
 else:
     load_dotenv(dotenv_path=BASE_DIR / '.env')
 
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise Exception("SECRET_KEY environment variable not set.")
+
+DEBUG = True
 # Fetch variables
 USER = os.getenv("user")
 PASSWORD = os.getenv("password")
@@ -67,10 +72,8 @@ except Exception as e:
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 # Application definition
 
