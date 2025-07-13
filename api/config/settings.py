@@ -17,6 +17,10 @@ import sys
 from dotenv import load_dotenv
 import psycopg2
 
+IS_PRODUCTION = os.getenv('ENV') == 'production'
+IS_DEVELOPMENT = os.getenv('ENV') == 'development'
+IS_TEST = os.getenv('ENV') == 'test'
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # api/config/ → api → raiz do projeto
 
 if 'test' in sys.argv:
@@ -29,7 +33,7 @@ if not SECRET_KEY:
     raise Exception("SECRET_KEY environment variable not set.")
 
 
-DEBUG = True
+DEBUG = not IS_PRODUCTION
 # Fetch variables
 USER = os.getenv("user")
 PASSWORD = os.getenv("password")
@@ -174,18 +178,22 @@ DATABASES = {
         'HOST': os.environ.get("host"),
         'PORT': os.environ.get("port"),
         'OPTIONS': {
-            'sslmode': 'require',
+            'sslmode': 'require'
         },
         'TEST': {
-            'NAME': os.getenv("test_dbname"),
-            'USER': os.getenv("test_user"),
-            'PASSWORD': os.getenv("test_password"),
-            'HOST': os.getenv("test_host"),
-            'PORT': os.getenv("test_port"),
+            'NAME': os.environ.get("test_dbname"),
+            'USER': os.environ.get("test_user"),
+            'PASSWORD': os.environ.get("test_password"),
+            'HOST': os.environ.get("test_host"),
+            'PORT': os.environ.get("test_port"),
+            'OPTIONS': {
+                'sslmode': 'require'
+            },
         },
     }
 }
 
+# py manage.py test pets.tests.addPet
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
