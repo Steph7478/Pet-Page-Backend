@@ -3,6 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from unittest.mock import patch
 from users.models.userInfo import UserProfile
 from django.contrib.auth.models import User
+import uuid
 
 # py manage.py test pets.tests.addPet --keepdb
 
@@ -11,7 +12,7 @@ class PetUploadTest(APITestCase):
         user = User.objects.create_user(username="owner_test", password="senha_segura", email="owner@test.com")
 
         self.owner = UserProfile.objects.create(
-            id="8a7c5f2e-1234-5678-9abc-def012345678",
+            id=uuid.uuid4(),
             user=user,
             name="owner_test",
             role="anunciante"

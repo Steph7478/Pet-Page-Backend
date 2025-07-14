@@ -6,10 +6,11 @@ from api.database import supabase
 from pets.models.petInfo import Pet
 from pets.serializers.petInfoSerializer import PetSerializer
 from rest_framework.permissions import AllowAny
+from api.docs.doc import document_api
 
 class PetView(APIView):
     permission_classes = [AllowAny]
-    
+
     def _upload_to_supabase(self, file):
         ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
         file_ext = file.name.split('.')[-1].lower()
@@ -27,7 +28,8 @@ class PetView(APIView):
 
         public_url = supabase.storage.from_("pets-avatar").get_public_url(path)
         return public_url
-
+    
+    @document_api(PetSerializer, summary="Adicionar pet", request_body=True)
     def post(self, request):
         try:
             foto = request.FILES.get('fotoUrl')
@@ -50,7 +52,8 @@ class PetView(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
+    @document_api(PetSerializer, Pet, summary="Listar pets")
     def get(self, request):
         filters = {}
         valid_fields = [f.name for f in Pet._meta.fields]

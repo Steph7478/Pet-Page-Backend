@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'pets.apps.PetsConfig',
     'users.apps.UsersConfig',
     'adoption.apps.AdoptionConfig',
+    'drf_yasg',
 ]
 
 AUTHENTICATION_BACKENDS = [
