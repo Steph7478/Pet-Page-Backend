@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+class LoginSerializer(TokenObtainPairSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
 

@@ -200,6 +200,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'AccessCookieAuth': {
+            'type': 'apiKey',
+            'in': 'cookie',
+            'name': 'access_token',
+        },
+        'RefreshCookieAuth': {
+            'type': 'apiKey',
+            'in': 'cookie',
+            'name': 'refresh_token',
+        },
+    }
+}
+
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'

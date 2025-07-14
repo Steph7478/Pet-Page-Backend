@@ -21,7 +21,22 @@ def generate_query_params_from_model(model):
                 name=field.name,
                 in_=openapi.IN_QUERY,
                 description=f"Filtrar por {field.verbose_name or field.name}",
-                type=param_type
+                type=param_type,
+                required=False,
             )
         )
     return params
+
+def generate_cookie_auth_param(cookie_name='access_token'):
+    """
+    Gera parâmetro manual para documentar cookie JWT no header 'Cookie'.
+    """
+    return openapi.Parameter(
+        name='Cookie',
+        in_=openapi.IN_HEADER,
+        description=f'Cookie JWT de autenticação. Exemplo: {cookie_name}=seu_token_jwt_aqui',
+        type=openapi.TYPE_STRING,
+        required=True,
+    )
+
+

@@ -3,7 +3,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.response import Response
 from rest_framework import status
+from api.docs.doc import document_api
+from api.docs.params import generate_cookie_auth_param
 
+@document_api(
+    summary="Atualizar token",
+    security=[{"RefreshCookieAuth": []}],
+    manual_parameters=[generate_cookie_auth_param(cookie_name="refresh_token")],
+    methods=['post']
+)
 @api_view(['POST'])
 def refresh_token(request):
     refresh_token = request.COOKIES.get('refresh_token')

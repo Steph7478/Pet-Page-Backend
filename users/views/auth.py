@@ -5,14 +5,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework import status, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
+from api.docs.doc import document_api
+from api.docs.params import generate_cookie_auth_param
 from api.middlewares.cookies import CookieJWTAuthentication
-from users.serializers.auth import EmailTokenObtainPairSerializer, RegisterSerializer
+from users.serializers.auth import LoginSerializer, RegisterSerializer
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
+    @document_api(LoginSerializer, summary="Iniciar sessão", request_body=True)
     def post(self, request):
-        serializer = EmailTokenObtainPairSerializer(data=request.data)
+        serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             refresh = serializer.validated_data['refresh']
             access = serializer.validated_data['access']
@@ -45,6 +48,7 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [CookieJWTAuthentication]
 
+    @document_api(summary="Finalizar sessão", request_body=True, security=[{"RefreshCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="refresh_token")])
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get('refresh_token')
@@ -73,12 +77,13 @@ class LogoutView(APIView):
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
+    @document_api(RegisterSerializer, summary="Cadastrar", request_body=True)
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
 
-            token_serializer = EmailTokenObtainPairSerializer(data={
+            token_serializer = LoginSerializer(data={
                 'email': request.data.get('email'),
                 'password': request.data.get('password')
             })
@@ -118,6 +123,7 @@ class RegisterView(APIView):
 class DeleteAccountView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @document_api(summary="Deletar Conta", request_body=True, security=[{"AccessCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")])
     def delete(self, request):
         user = request.user
         user.delete()
