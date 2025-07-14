@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from adoption.models.allowAdoption import AllowAdoption
+from adoption.models.adopt import AllowAdoption
 
 class AllowAdoptionSerializer(serializers.ModelSerializer):
     class Meta:

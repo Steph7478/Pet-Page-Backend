@@ -4,7 +4,6 @@ from rest_framework import status
 from adoption.serializers.formularioSerializer import FormularioSerializer
 from rest_framework import permissions
 
-
 class FormularioView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

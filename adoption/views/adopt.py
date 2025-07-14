@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
-from adoption.models.allowAdoption import AllowAdoption, PetAdoption
-from adoption.serializers.allowAdoptionSerializer import AllowAdoptionSerializer
+from adoption.models.adopt import AllowAdoption, PetAdoption
+from adoption.serializers.adopt import AllowAdoptionSerializer
 from pets.models.petInfo import Pet
 from django.utils.dateparse import parse_date
 
