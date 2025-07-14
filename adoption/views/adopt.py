@@ -2,15 +2,17 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
-from adoption.models.adopt import AllowAdoption, PetAdoption
-from adoption.serializers.adopt import AllowAdoptionSerializer
+from adoption.models.adopt import Adoption, PetAdoption
+from adoption.serializers.adopt import AdoptionSerializer,GetAdoptionSerializer
+from api.docs.doc import document_api
+from api.docs.params import generate_cookie_auth_param
 from pets.models.petInfo import Pet
 from django.utils.dateparse import parse_date
 
-class AllowAdoptionView(APIView):
+class AdoptionView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-
+    @document_api(AdoptionSerializer, summary="Aceitar Adoção", request_body=True, security=[{"AccessCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")])
     def post(self, request):
         client_id = request.data.get('clientId')
         pet_ids = request.data.get('petId', [])
@@ -21,7 +23,7 @@ class AllowAdoptionView(APIView):
         if not isinstance(pet_ids, (list, tuple)):
             pet_ids = [pet_ids]
 
-        adoption, _ = AllowAdoption.objects.get_or_create(clientId_id=client_id)
+        adoption, _ = Adoption.objects.get_or_create(clientId_id=client_id)
 
         for pet_id in pet_ids:
             try:
@@ -34,9 +36,10 @@ class AllowAdoptionView(APIView):
 
             PetAdoption.objects.get_or_create(adoption=adoption, pet=pet)
 
-        serializer = AllowAdoptionSerializer(adoption)
+        serializer = GetAdoptionSerializer(adoption)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+    @document_api(AdoptionSerializer, model=PetAdoption, summary="Listar Adoções", security=[{"AccessCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")])
     def get(self, request):
         filters = {}
         valid_fields = [f.name for f in Pet._meta.fields]
@@ -63,7 +66,7 @@ class AllowAdoptionView(APIView):
             else:
                 pets = Pet.objects.all()
 
-            adoptions = AllowAdoption.objects.filter(pet_links__pet__in=pets)
+            adoptions = Adoption.objects.filter(pet_links__pet__in=pets)
 
             if client_id:
                 adoptions = adoptions.filter(clientId_id=client_id)
@@ -76,7 +79,7 @@ class AllowAdoptionView(APIView):
             if not adoptions.exists():
                 return Response({'detail': 'Nenhuma adoção encontrada com os filtros aplicados.'}, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = AllowAdoptionSerializer(adoptions, many=True)
+            serializer = GetAdoptionSerializer(adoptions, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
