@@ -3,22 +3,23 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 from adoption.models.adopt import Adoption, PetAdoption
-from adoption.serializers.adopt import AdoptionSerializer,GetAdoptionSerializer
+from adoption.models.formulario import Formulario
+from adoption.serializers.adopt import AdoptionSerializer, GetAdoptionSerializer
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
 from pets.models.petInfo import Pet
 from django.utils.dateparse import parse_date
 
+
 class AdoptionView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    @document_api(AdoptionSerializer, summary="Aceitar Adoção", request_body=True, security=[{"AccessCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")])
-    def post(self, request):
+    def handle_adoption(self, request, action):
         client_id = request.data.get('clientId')
         pet_ids = request.data.get('petId', [])
 
         if not client_id:
-            return Response({"error": "clientId is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "clientId é obrigatório"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not isinstance(pet_ids, (list, tuple)):
             pet_ids = [pet_ids]
@@ -31,15 +32,27 @@ class AdoptionView(APIView):
             except Pet.DoesNotExist:
                 return Response({"error": f"Pet com id {pet_id} não existe"}, status=status.HTTP_400_BAD_REQUEST)
 
-            pet.status = 'adotado'
-            pet.save()
+            if action == 'permitir':
+                pet.status = 'adotado'
+                pet.save()
+                adoption.save()
+                PetAdoption.objects.get_or_create(adoption=adoption, pet=pet)
 
-            PetAdoption.objects.get_or_create(adoption=adoption, pet=pet)
+            elif action == 'rejeitar':
+                pet.status = 'disponível'
+                pet.save()
+                Formulario.objects.filter(clientId=client_id, petId=pet_id).delete()
 
         serializer = GetAdoptionSerializer(adoption)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    @document_api(AdoptionSerializer, model=PetAdoption, summary="Listar Adoções", security=[{"AccessCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")])
+
+    @document_api(
+        AdoptionSerializer,
+        model=PetAdoption,
+        summary="Listar Adoções",
+        security=[{"AccessCookieAuth": []}],
+        manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")]
+    )
     def get(self, request):
         filters = {}
         valid_fields = [f.name for f in Pet._meta.fields]
@@ -63,10 +76,10 @@ class AdoptionView(APIView):
                 pets = Pet.objects.filter(**filters)
                 if not pets.exists():
                     return Response({'detail': 'Nenhum pet encontrado com os filtros aplicados.'}, status=status.HTTP_404_NOT_FOUND)
-            else:
-                pets = Pet.objects.all()
 
-            adoptions = Adoption.objects.filter(pet_links__pet__in=pets)
+                adoptions = Adoption.objects.filter(pet_links__pet__in=pets)
+            else:
+                adoptions = Adoption.objects.all()
 
             if client_id:
                 adoptions = adoptions.filter(clientId_id=client_id)
@@ -84,3 +97,27 @@ class AdoptionView(APIView):
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApproveAdoptionView(AdoptionView):
+    @document_api(
+        AdoptionSerializer,
+        summary="Permitir Adoção",
+        request_body=True,
+        security=[{"AccessCookieAuth": []}],
+        manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")]
+    )
+    def post(self, request):
+        return self.handle_adoption(request, action='permitir')
+
+
+class RejectAdoptionView(AdoptionView):
+    @document_api(
+        AdoptionSerializer,
+        summary="Rejeitar Adoção",
+        request_body=True,
+        security=[{"AccessCookieAuth": []}],
+        manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")]
+    )
+    def post(self, request):
+        return self.handle_adoption(request, action='rejeitar')

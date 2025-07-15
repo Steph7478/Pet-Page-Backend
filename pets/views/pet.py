@@ -33,14 +33,18 @@ class PetView(APIView):
     def post(self, request):
         try:
             foto = request.FILES.get('fotoUrl')
-            if not foto:
-                return Response({'error': 'Campo "fotoUrl" é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            foto_url = self._upload_to_supabase(foto)
-
             data = request.data.copy()
-            data['fotoUrl'] = foto_url
             data['status'] = 'disponivel'
+
+            if foto:
+                foto_url = self._upload_to_supabase(foto)
+                data['fotoUrl'] = foto_url
+            else:
+                if not data.get('fotoUrl'):
+                  return Response(
+                    {"fotoUrl": ["Este campo é obrigatório. Envie uma URL ou faça upload de uma imagem."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             serializer = PetSerializer(data=data)
 
