@@ -11,6 +11,7 @@ def document_api(serializer=None, model=None, summary=None, request_body=False, 
     - `security`: lista para configurar o esquema de autenticação (ex: [{"RefreshCookieAuth" or "AccessCookieAuth": []}])
     - `responses`: dict para customizar respostas (ex: {200: serializer, 400: "Bad request"})
     - `manual_parameters`: lista adicional de parâmetros manuais para incluir (ex: cookie auth)
+    - `methods`: para @api_view
     """
     def decorator(func):
         resp = responses

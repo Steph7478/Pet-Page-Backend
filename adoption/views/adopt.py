@@ -9,7 +9,8 @@ from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
 from pets.models.petInfo import Pet
 from django.utils.dateparse import parse_date
-
+from rest_framework.exceptions import MethodNotAllowed
+from drf_yasg.utils import swagger_auto_schema
 
 class AdoptionView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -100,6 +101,10 @@ class AdoptionView(APIView):
 
 
 class ApproveAdoptionView(AdoptionView):
+    @swagger_auto_schema(auto_schema=None)
+    def get(self, request, *args, **kwargs):
+        raise MethodNotAllowed('GET')
+     
     @document_api(
         AdoptionSerializer,
         summary="Permitir Adoção",
@@ -112,6 +117,10 @@ class ApproveAdoptionView(AdoptionView):
 
 
 class RejectAdoptionView(AdoptionView):
+    @swagger_auto_schema(auto_schema=None)
+    def get(self, request, *args, **kwargs):
+        raise MethodNotAllowed('GET')
+    
     @document_api(
         AdoptionSerializer,
         summary="Rejeitar Adoção",
