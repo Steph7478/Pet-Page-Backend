@@ -113,7 +113,7 @@ class ApproveAdoptionView(AdoptionView):
         manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")]
     )
     def post(self, request):
-        return self.handle_adoption(request, action='permitir')
+        return super().handle_adoption(request, action='permitir')
 
 
 class RejectAdoptionView(AdoptionView):
@@ -129,4 +129,4 @@ class RejectAdoptionView(AdoptionView):
         manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")]
     )
     def post(self, request):
-        return self.handle_adoption(request, action='rejeitar')
+        return super().handle_adoption(request, action='rejeitar')
