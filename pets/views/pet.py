@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from api.database import supabase
+from common.utils import filtrar_e_listar
 from pets.models.petInfo import Pet
 from pets.serializers.petInfoSerializer import PetSerializer
 from rest_framework.permissions import AllowAny
@@ -56,32 +57,15 @@ class PetView(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+    
+    
     @document_api(PetSerializer, Pet, summary="Listar pets")
     def get(self, request):
-        filters = {}
-        valid_fields = [f.name for f in Pet._meta.fields]
+        return filtrar_e_listar(
+            request=request,
+            model=Pet,
+            serializer_class=PetSerializer,
+            not_found_message="Nenhum pet encontrado."
+    )
 
-        for key, value in request.query_params.items():
-            if key in valid_fields:
-                field = Pet._meta.get_field(key)
-                internal_type = field.get_internal_type()
 
-                if internal_type in ["CharField", "TextField"]:
-                    filters[f"{key}__icontains"] = value
-                else:
-                    filters[key] = value
-
-        try:
-            if filters:
-                pets = Pet.objects.filter(**filters)
-                if not pets.exists():
-                    return Response({'detail': 'Nenhum pet encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-            else:
-                pets = Pet.objects.all()
-
-            serializer = PetSerializer(pets, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
