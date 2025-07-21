@@ -45,3 +45,4 @@ urllib3==2.5.0
 websockets==15.0.1
 drf-yasg==1.21.10
 whitenoise==6.9.0
+django-ratelimit==4.1.0

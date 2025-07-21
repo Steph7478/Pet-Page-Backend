@@ -10,7 +10,9 @@ from api.docs.params import generate_cookie_auth_param
 from api.middlewares.cookies import CookieJWTAuthentication
 from common.utils import DenyAllPermission, get_permissions_by_method
 from users.serializers.auth import LoginSerializer, RegisterSerializer
+from django_ratelimit.decorators import ratelimit
 
+@ratelimit(key='ip', rate='5/m', block=True)
 class LoginView(APIView):
     def get_permissions(self):
         return get_permissions_by_method(
@@ -52,7 +54,7 @@ class LoginView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
+@ratelimit(key='ip', rate='5/m', block=True)
 class LogoutView(APIView):
     def get_permissions(self):
         return get_permissions_by_method(
@@ -90,7 +92,7 @@ class LogoutView(APIView):
 
         return response
 
-
+@ratelimit(key='ip', rate='5/m', block=True)
 class RegisterView(APIView):
     def get_permissions(self):
         return get_permissions_by_method(
