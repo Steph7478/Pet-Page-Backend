@@ -3,15 +3,24 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from rest_framework import status, permissions
+from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
 from api.middlewares.cookies import CookieJWTAuthentication
+from common.utils import DenyAllPermission, get_permissions_by_method
 from users.serializers.auth import LoginSerializer, RegisterSerializer
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]
+    def get_permissions(self):
+        return get_permissions_by_method(
+            self.request.method,
+            get_perm=DenyAllPermission,
+            post_perm=IsAuthenticated,
+            put_perm=DenyAllPermission,
+            patch_perm=DenyAllPermission,
+            delete_perm=DenyAllPermission,
+        )
 
     @document_api(LoginSerializer, summary="Iniciar sessão", request_body=True)
     def post(self, request):
@@ -45,7 +54,15 @@ class LoginView(APIView):
     
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        return get_permissions_by_method(
+            self.request.method,
+            get_perm=DenyAllPermission,
+            post_perm=IsAuthenticated,
+            put_perm=DenyAllPermission,
+            patch_perm=DenyAllPermission,
+            delete_perm=DenyAllPermission,
+        )
     authentication_classes = [CookieJWTAuthentication]
 
     @document_api(summary="Finalizar sessão", request_body=True, security=[{"RefreshCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="refresh_token")])
@@ -75,7 +92,15 @@ class LogoutView(APIView):
 
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny]
+    def get_permissions(self):
+        return get_permissions_by_method(
+            self.request.method,
+            get_perm=IsAuthenticated,
+            post_perm=AllowAny,
+            put_perm=DenyAllPermission,
+            patch_perm=DenyAllPermission,
+            delete_perm=DenyAllPermission,
+        )
 
     @document_api(RegisterSerializer, summary="Cadastrar", request_body=True)
     def post(self, request):
@@ -121,7 +146,15 @@ class RegisterView(APIView):
 
 
 class DeleteAccountView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    def get_permissions(self):
+        return get_permissions_by_method(
+            self.request.method,
+            get_perm=DenyAllPermission,
+            post_perm=DenyAllPermission,
+            put_perm=DenyAllPermission,
+            patch_perm=DenyAllPermission,
+            delete_perm=IsAuthenticated,
+        )
 
     @document_api(summary="Deletar Conta", request_body=True, security=[{"AccessCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")])
     def delete(self, request):
