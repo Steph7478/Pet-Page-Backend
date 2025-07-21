@@ -6,12 +6,14 @@ from adoption.models.formulario import Formulario
 from adoption.serializers.adopt import AdoptionSerializer, GetAdoptionSerializer
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
-from common.utils import DenyAllPermission, get_permissions_by_method
+from common.utils import DenyAllPermission, filtrar_e_listar, get_permissions_by_method
 from pets.models.petInfo import Pet
 from django.utils.dateparse import parse_date
 from rest_framework.exceptions import MethodNotAllowed
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
+
+from pets.serializers.petInfoSerializer import PetSerializer
 
 class AdoptionView(APIView):
     def get_permissions(self):
@@ -64,49 +66,41 @@ class AdoptionView(APIView):
         manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")]
     )
     def get(self, request):
-        filters = {}
-        valid_fields = [f.name for f in Pet._meta.fields]
+        pets_response = filtrar_e_listar(
+            request=request,
+            model=Pet,
+            serializer_class=PetSerializer,
+            not_found_message="Nenhum pet encontrado com os filtros aplicados."
+        )
 
-        for key, value in request.query_params.items():
-            if key in valid_fields:
-                field = Pet._meta.get_field(key)
-                internal_type = field.get_internal_type()
+        if pets_response.status_code == 404:
+            return pets_response
 
-                if internal_type in ["CharField", "TextField"]:
-                    filters[f"{key}__icontains"] = value
-                else:
-                    filters[key] = value
+        pets_data = pets_response.data
+        pet_ids = [pet['id'] for pet in pets_data]
+
+        adoptions = Adoption.objects.filter(pet_links__pet__id__in=pet_ids)
 
         client_id = request.query_params.get('clientId')
         data_inicio = parse_date(request.query_params.get('data_inicio', ''))
         data_fim = parse_date(request.query_params.get('data_fim', ''))
 
-        try:
-            if filters:
-                pets = Pet.objects.filter(**filters)
-                if not pets.exists():
-                    return Response({'detail': 'Nenhum pet encontrado com os filtros aplicados.'}, status=status.HTTP_404_NOT_FOUND)
+        if client_id:
+            adoptions = adoptions.filter(clientId_id=client_id)
 
-                adoptions = Adoption.objects.filter(pet_links__pet__in=pets)
-            else:
-                adoptions = Adoption.objects.all()
+        if data_inicio and data_fim:
+            adoptions = adoptions.filter(pet_links__dataAdocao__range=[data_inicio, data_fim])
 
-            if client_id:
-                adoptions = adoptions.filter(clientId_id=client_id)
+        adoptions = adoptions.distinct()
 
-            if data_inicio and data_fim:
-                adoptions = adoptions.filter(pet_links__dataAdocao__range=[data_inicio, data_fim])
+        if not adoptions.exists():
+            return Response(
+                {'detail': 'Nenhuma adoção encontrada com os filtros aplicados.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-            adoptions = adoptions.distinct()
-
-            if not adoptions.exists():
-                return Response({'detail': 'Nenhuma adoção encontrada com os filtros aplicados.'}, status=status.HTTP_404_NOT_FOUND)
-
-            serializer = GetAdoptionSerializer(adoptions, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = GetAdoptionSerializer(adoptions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ApproveAdoptionView(AdoptionView):
