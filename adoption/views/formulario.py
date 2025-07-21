@@ -3,13 +3,21 @@ from rest_framework.response import Response
 from rest_framework import status
 from adoption.models.formulario import Formulario
 from adoption.serializers.formularioSerializer import FormularioSerializer
-from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
-from common.utils import filtrar_e_listar
+from common.utils import DenyAllPermission, filtrar_e_listar, get_permissions_by_method
 
 class FormularioView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    def get_permissions(self):
+        return get_permissions_by_method(
+            self.request.method,
+            get_perm=IsAuthenticated,
+            post_perm=IsAuthenticated,
+            put_perm=DenyAllPermission,
+            patch_perm=DenyAllPermission,
+            delete_perm=DenyAllPermission,
+        )
 
     @document_api(FormularioSerializer, summary="Criar Formulário", request_body=True, security=[{"AccessCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")])
     def post(self, request):
