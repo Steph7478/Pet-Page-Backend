@@ -12,7 +12,6 @@ from common.utils import DenyAllPermission, get_permissions_by_method
 from users.serializers.auth import LoginSerializer, RegisterSerializer
 from django_ratelimit.decorators import ratelimit
 
-@ratelimit(key='ip', rate='5/m', block=True)
 class LoginView(APIView):
     def get_permissions(self):
         return get_permissions_by_method(
@@ -25,6 +24,7 @@ class LoginView(APIView):
         )
 
     @document_api(LoginSerializer, summary="Iniciar sessão", request_body=True)
+    @ratelimit(key='ip', rate='5/m', block=True)
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -54,7 +54,6 @@ class LoginView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-@ratelimit(key='ip', rate='5/m', block=True)
 class LogoutView(APIView):
     def get_permissions(self):
         return get_permissions_by_method(
@@ -68,6 +67,7 @@ class LogoutView(APIView):
     authentication_classes = [CookieJWTAuthentication]
 
     @document_api(summary="Finalizar sessão", request_body=True, security=[{"RefreshCookieAuth": []}], manual_parameters=[generate_cookie_auth_param(cookie_name="refresh_token")])
+    @ratelimit(key='ip', rate='5/m', block=True)
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get('refresh_token')
@@ -92,7 +92,6 @@ class LogoutView(APIView):
 
         return response
 
-@ratelimit(key='ip', rate='5/m', block=True)
 class RegisterView(APIView):
     def get_permissions(self):
         return get_permissions_by_method(
@@ -105,6 +104,7 @@ class RegisterView(APIView):
         )
 
     @document_api(RegisterSerializer, summary="Cadastrar", request_body=True)
+    @ratelimit(key='ip', rate='5/m', block=True)
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
