@@ -1,5 +1,4 @@
 from rest_framework.views import APIView
-from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 from adoption.models.adopt import Adoption, PetAdoption
@@ -7,13 +6,23 @@ from adoption.models.formulario import Formulario
 from adoption.serializers.adopt import AdoptionSerializer, GetAdoptionSerializer
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
+from common.utils import DenyAllPermission, get_permissions_by_method
 from pets.models.petInfo import Pet
 from django.utils.dateparse import parse_date
 from rest_framework.exceptions import MethodNotAllowed
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.permissions import IsAuthenticated
 
 class AdoptionView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    def get_permissions(self):
+        return get_permissions_by_method(
+            self.request.method,
+            get_perm=IsAuthenticated,
+            post_perm=IsAuthenticated,
+            put_perm=DenyAllPermission,
+            patch_perm=DenyAllPermission,
+            delete_perm=DenyAllPermission,
+        )
 
     def handle_adoption(self, request, action):
         client_id = request.data.get('clientId')

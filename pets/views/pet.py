@@ -3,14 +3,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from api.database import supabase
-from common.utils import filtrar_e_listar
+from common.utils import DenyAllPermission, filtrar_e_listar, get_permissions_by_method
 from pets.models.petInfo import Pet
 from pets.serializers.petInfoSerializer import PetSerializer
 from rest_framework.permissions import AllowAny
 from api.docs.doc import document_api
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 
 class PetView(APIView):
-    permission_classes = [AllowAny]
+    def get_permissions(self):
+        return get_permissions_by_method(
+            self.request.method,
+            get_perm=AllowAny,
+            post_perm=IsAuthenticated,
+            put_perm=DenyAllPermission,
+            patch_perm=DenyAllPermission,
+            delete_perm=DenyAllPermission,
+        )
 
     def _upload_to_supabase(self, file):
         ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
