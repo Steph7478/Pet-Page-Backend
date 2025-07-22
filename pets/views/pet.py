@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from api.database import supabase
-from common.utils import DenyAllPermission, filtrar_e_listar, get_permissions_by_method
+from common.utils.filter import filtrar_e_listar
+from common.utils.permissions import DenyAllPermission, get_permissions_by_method
 from pets.models.petInfo import Pet
 from pets.serializers.petInfoSerializer import PetSerializer
 from rest_framework.permissions import AllowAny

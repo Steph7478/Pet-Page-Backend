@@ -5,7 +5,7 @@ from rest_framework import status
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
 from api.middlewares.cookies import CookieJWTAuthentication
-from common.utils import DenyAllPermission, get_permissions_by_method
+from common.utils.permissions import DenyAllPermission, get_permissions_by_method
 from users.serializers.userInfoSerializer import UserSerializer
 
 

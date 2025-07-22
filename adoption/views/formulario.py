@@ -6,7 +6,8 @@ from adoption.serializers.formularioSerializer import FormularioSerializer
 from rest_framework.permissions import IsAuthenticated
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
-from common.utils import DenyAllPermission, filtrar_e_listar, get_permissions_by_method
+from common.utils.filter import filtrar_e_listar
+from common.utils.permissions import DenyAllPermission, get_permissions_by_method
 
 class FormularioView(APIView):
     def get_permissions(self):

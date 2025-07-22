@@ -6,7 +6,8 @@ from adoption.models.formulario import Formulario
 from adoption.serializers.adopt import AdoptionSerializer, GetAdoptionSerializer
 from api.docs.doc import document_api
 from api.docs.params import generate_cookie_auth_param
-from common.utils import DenyAllPermission, filtrar_e_listar, get_permissions_by_method
+from common.utils.filter import filtrar_e_listar
+from common.utils.permissions import DenyAllPermission, get_permissions_by_method
 from pets.models.petInfo import Pet
 from django.utils.dateparse import parse_date
 from rest_framework.exceptions import MethodNotAllowed
