@@ -16,6 +16,7 @@ urlpatterns = [
 
     path("formularios", FormularioView.as_view()),
     path("pets", PetView.as_view()),
+    path('pets/<uuid:petId>', PetView.as_view()),
     
     path("adoptions", AdoptionView.as_view()),
     path('adoptions/approve', ApproveAdoptionView.as_view()),

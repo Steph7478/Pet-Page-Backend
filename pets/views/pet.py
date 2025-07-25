@@ -84,10 +84,18 @@ class PetView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @document_api(PetSerializer, Pet, summary="Listar pets")
-    def get(self, request):
-        return filtrar_e_listar(
-            request=request,
-            model=Pet,
-            serializer_class=PetSerializer,
-            not_found_message="Nenhum pet encontrado."
-        )
+    def get(self, request, petId=None):
+        if petId:
+            try:
+                pet = Pet.objects.get(petId=petId)
+                serializer = PetSerializer(pet)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Pet.DoesNotExist:
+                return Response({"detail": "Pet não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return filtrar_e_listar(
+                request=request,
+                model=Pet,
+                serializer_class=PetSerializer,
+                not_found_message="Nenhum pet encontrado."
+            )
