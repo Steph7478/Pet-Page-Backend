@@ -3,13 +3,14 @@ import uuid
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from api.database import supabase
+from api.database.supabase import supabase
 from common.utils.filter import filtrar_e_listar
 from common.utils.permissions import DenyAllPermission, get_permissions_by_method
 from pets.models.petInfo import Pet
 from pets.serializers.petInfoSerializer import PetSerializer
 from rest_framework.permissions import AllowAny
 from api.docs.doc import document_api
+from rest_framework.permissions import IsAuthenticated
 
 
 class PetView(APIView):
@@ -17,29 +18,42 @@ class PetView(APIView):
         return get_permissions_by_method(
             self.request.method,
             get_perm=AllowAny,
-            post_perm=AllowAny,
+            post_perm=IsAuthenticated,
             put_perm=DenyAllPermission,
             patch_perm=DenyAllPermission,
             delete_perm=DenyAllPermission,
         )
-
     def _upload_to_supabase(self, file):
         ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
         file_ext = file.name.split('.')[-1].lower()
-
         if file_ext not in ALLOWED_EXTENSIONS:
             raise Exception(f"Extensão '{file_ext}' não permitida.")
 
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
         path = f"pets/{unique_filename}"
 
-        result = supabase.storage.from_("pets-avatar").upload(path, file, file.content_type)
+        file_bytes = file.read()
 
-        if result.get("error"):
-            raise Exception(result["error"]["message"])
+        result = supabase.storage.from_("pets-avatar").upload(
+            path,
+            file_bytes,
+            {"content-type": file.content_type}
+        )
+
+        error = None
+        if hasattr(result, "error") and result.error:
+            error = result.error
+        elif isinstance(result, dict) and result.get("error"):
+            error = result["error"]
+        elif hasattr(result, "status_code") and result.status_code >= 400:
+            error = f"Upload falhou com status {result.status_code}"
+
+        if error:
+            raise Exception(f"Erro ao fazer upload no Supabase: {error}")
 
         public_url = supabase.storage.from_("pets-avatar").get_public_url(path)
         return public_url
+
 
     @document_api(PetSerializer, summary="Adicionar pet", request_body=True)
     def post(self, request):
