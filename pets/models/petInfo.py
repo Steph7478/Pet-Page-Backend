@@ -27,4 +27,4 @@ class Pet(models.Model):
     descricao = models.CharField(max_length=1000)
     localizacao = models.CharField(max_length=100)
     fotoUrl = models.URLField(max_length=1000)
-    status = models.CharField(max_length=100, choices=PET_STATUS)
+    status = models.CharField(max_length=100, choices=PET_STATUS, default='disponivel')

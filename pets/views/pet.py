@@ -59,8 +59,6 @@ class PetView(APIView):
     def post(self, request):
         try:
             data = request.data.copy()
-            data['status'] = 'disponivel'
-
             foto = request.FILES.get('fotoUrl')
 
             if foto:
