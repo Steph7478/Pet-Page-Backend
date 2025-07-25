@@ -8,12 +8,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = '__all__'
 
+
 class UserSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'username', 'role']
+
+    def get_id(self, obj):
+        try:
+            return str(obj.profile.id)
+        except UserProfile.DoesNotExist:
+            return None
 
     def get_role(self, obj):
         try:
