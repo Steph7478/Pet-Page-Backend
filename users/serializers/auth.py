@@ -28,12 +28,12 @@ class LoginSerializer(TokenObtainPairSerializer):
 from users.models.userInfo import UserProfile
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
-    role = serializers.ChoiceField(choices=UserProfile.ROLE_CHOICES, write_only=True)
-
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'password', 'role')
+        
+    password = serializers.CharField(write_only=True, required=True)
+    role = serializers.ChoiceField(choices=UserProfile.ROLE_CHOICES, write_only=True)
 
     def create(self, validated_data):
         role = validated_data.pop('role')
