@@ -18,7 +18,7 @@ class LoginView(APIView):
         return get_permissions_by_method(
             self.request.method,
             get_perm=DenyAllPermission,
-            post_perm=IsAuthenticated,
+            post_perm=AllowAny,
             put_perm=DenyAllPermission,
             patch_perm=DenyAllPermission,
             delete_perm=DenyAllPermission,
