@@ -55,8 +55,10 @@ class AdoptionView(APIView):
                 pet.status = 'disponivel'
                 pet.save()
                 Formulario.objects.filter(clientId=client_id, petId=pet_id).delete()
+                PetAdoption.objects.filter(adoption=adoption, pet=pet).delete()
             
-            if action in ('rejeitar', 'cancelar') and not PetAdoption.objects.filter(adoption=adoption).exists():
+        if action in ('rejeitar', 'cancelar') and adoption:
+            if not PetAdoption.objects.filter(adoption=adoption).exists():
                 adoption.delete()
 
         serializer = GetAdoptionSerializer(adoption)
