@@ -95,7 +95,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'pet-page.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'pet-page.onrender.com', 'pet-page-provisory.vercel.app']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -112,6 +112,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://pet-page.onrender.com",
+    "https://pet-page-provisory.vercel.app"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
