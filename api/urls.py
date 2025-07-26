@@ -1,5 +1,5 @@
 from django.urls import path
-from adoption.views.adopt import AdoptionView, ApproveAdoptionView, RejectAdoptionView
+from adoption.views.adopt import AdoptionView, ApproveAdoptionView, CancelAdoptionView, RejectAdoptionView
 from users.views.auth import DeleteAccountView, LoginView, LogoutView, RegisterView
 from users.views.refreshToken import refresh_token
 from adoption.views.formulario import FormularioView
@@ -21,4 +21,5 @@ urlpatterns = [
     path("adoptions", AdoptionView.as_view()),
     path('adoptions/approve', ApproveAdoptionView.as_view()),
     path('adoptions/reject', RejectAdoptionView.as_view()),
+    path('adoptions/cancel', CancelAdoptionView.as_view()),
 ]

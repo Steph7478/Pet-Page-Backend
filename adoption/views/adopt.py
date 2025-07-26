@@ -51,7 +51,7 @@ class AdoptionView(APIView):
                 adoption.save()
                 PetAdoption.objects.get_or_create(adoption=adoption, pet=pet)
 
-            elif action == 'rejeitar':
+            elif action in ('rejeitar', 'cancelar'):
                 pet.status = 'disponível'
                 pet.save()
                 Formulario.objects.filter(clientId=client_id, petId=pet_id).delete()
@@ -134,3 +134,18 @@ class RejectAdoptionView(AdoptionView):
     )
     def post(self, request):
         return super().handle_adoption(request, action='rejeitar')
+    
+class CancelAdoptionView(AdoptionView):
+    @swagger_auto_schema(auto_schema=None)
+    def get(self, request, *args, **kwargs):
+        raise MethodNotAllowed('GET')
+    
+    @document_api(
+        AdoptionSerializer,
+        summary="Cancelar Adoção",
+        request_body=True,
+        security=[{"AccessCookieAuth": []}],
+        manual_parameters=[generate_cookie_auth_param(cookie_name="access_token")]
+    )
+    def post(self, request):
+        return super().handle_adoption(request, action='cancelar')
