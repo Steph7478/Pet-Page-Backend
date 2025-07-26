@@ -52,7 +52,7 @@ class AdoptionView(APIView):
                 PetAdoption.objects.get_or_create(adoption=adoption, pet=pet)
 
             elif action in ('rejeitar', 'cancelar'):
-                pet.status = 'disponível'
+                pet.status = 'disponivel'
                 pet.save()
                 Formulario.objects.filter(clientId=client_id, petId=pet_id).delete()
 
