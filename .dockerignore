@@ -1,0 +1,35 @@
+# Ignora arquivos python compilados
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignora ambientes virtuais locais
+env/
+venv/
+
+# Arquivos de controle de versão
+.git/
+.gitignore
+
+# Arquivos de logs
+*.log
+
+# Configurações do sistema (Mac, Windows)
+.DS_Store
+Thumbs.db
+
+# Outras pastas que não precisa copiar
+staticfiles/
+media/
+
+# Arquivos de ambiente local
+.env
+*.env
+
+# Pastas temporárias e cache
+tmp/
+.cache/
+
+# Uploads locais (se existir)
+uploads/
