@@ -81,8 +81,9 @@ The application will be available at `http://localhost:8000`.
 
 ### Authentication
 
-- `POST /api/users/register/` — Register a new user.  
-- `POST /api/users/login/` — Log in and obtain a JWT token.  
+- `POST /api/auth/register/` — Register a new user.  
+- `POST /api/auth/login/` — Log in and obtain a JWT token.
+- `POST /api/auth/logout/` — Log out the authenticated user.
 
 ### Pets
 
